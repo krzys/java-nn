@@ -2,7 +2,6 @@ package com.github.krzsernik;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 // TODO: weights adjusting method
 // TODO: something I forgot to mention
@@ -14,7 +13,7 @@ public class MultiLayerNN {
     }
     private List<Data> m_data = new ArrayList<>();
 
-    private List<Vector<Vector<Double>>> m_weights = new ArrayList<>();
+    private List<List<List<Double>>> m_weights = new ArrayList<>();
     private List<Integer> m_hiddenLayers = new ArrayList<>();
     private int m_inputs;
     private int m_outputs;
@@ -31,9 +30,9 @@ public class MultiLayerNN {
             nextLayerNeurons = hiddenLayers.get(0);
         }
 
-        Vector<Vector<Double>> matrix = new Vector<>();
+        List<List<Double>> matrix = new ArrayList<>();
         for(int input = 0; input < inputs; input++) {
-            Vector<Double> row = new Vector<>();
+            List<Double> row = new ArrayList<>();
             for(int nextLayerNeuron = 0; nextLayerNeuron < nextLayerNeurons; nextLayerNeuron++) {
                 row.add(Math.random());
             }
@@ -50,7 +49,7 @@ public class MultiLayerNN {
 
             matrix.clear();
             for(int currentLayerNeuron = 0; currentLayerNeuron < m_hiddenLayers.get(layer); currentLayerNeuron++) {
-                Vector<Double> row = new Vector<>();
+                List<Double> row = new ArrayList<>();
 
                 for(int nextLayerNeuron = 0; nextLayerNeuron < nextLayerNeurons; nextLayerNeuron++) {
                     row.add(Math.random());
@@ -112,7 +111,7 @@ public class MultiLayerNN {
 
     private List<Double> getWeightedSum(int layer, List<Double> inputs, boolean sigmoid) {
         List<Double> result = new ArrayList<>();
-        Vector<Vector<Double>> matrix = m_weights.get(layer);
+        List<List<Double>> matrix = m_weights.get(layer);
 
         for(int row = 0; row < matrix.size(); row++) {
             double neuronActivation = 0;
@@ -135,7 +134,28 @@ public class MultiLayerNN {
         return 1 / (1 + Math.pow(Math.E, -v));
     }
 
-    private void adjust(List<Double> result, List<Double> expected) {
+    private void adjust(List<Double> inputs, List<Double> expected) {
+        List<Double> result = inputs;
+        List<List<Double>> outputs = new ArrayList<>();
 
+        for(int layer = 0; layer < m_hiddenLayers.size(); layer++) {
+            result = getWeightedSum(layer, result, true);
+            outputs.add(result);
+        }
+
+        for(int layer = m_hiddenLayers.size() - 1; layer >= 0; layer++) {
+            for(int neuron = 0; neuron < m_hiddenLayers.get(layer); neuron++) {
+                for(int weight = 0; weight < m_weights.get(layer).get(neuron).size(); weight++) {
+                    double weightValue = m_weights.get(layer).get(neuron).get(weight);
+                    weightValue = cost(outputs.get(layer).get(neuron), expected.get(neuron));
+
+                    m_weights.get(layer).get(neuron).set(weight, weightValue);
+                }
+            }
+        }
+    }
+
+    private double cost(double y, double d) {
+        return Math.pow(d - y, 2);
     }
 }
