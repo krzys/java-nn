@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.Vector;
 
 // TODO: weights adjusting method
-// TODO: cost calculation method
-// TODO: predict method
 // TODO: something I forgot to mention
 
 public class MultiLayerNN {
@@ -18,11 +16,15 @@ public class MultiLayerNN {
 
     private List<Vector<Vector<Double>>> m_weights = new ArrayList<>();
     private List<Integer> m_hiddenLayers = new ArrayList<>();
+    private int m_inputs;
+    private int m_outputs;
     private double m_learningRate = 0.01;
     private double m_errorRate = 0.05;
 
     public MultiLayerNN(int inputs, List<Integer> hiddenLayers, int outputs) {
+        m_inputs = inputs;
         m_hiddenLayers = hiddenLayers;
+        m_outputs = outputs;
 
         int nextLayerNeurons = outputs;
         if(hiddenLayers.size() > 0) {
@@ -101,7 +103,36 @@ public class MultiLayerNN {
     }
 
     public List<Double> predict(List<Double> inputs) {
-        return List.of(0.);
+        for(int layer = 0; layer <= m_hiddenLayers.size(); layer++) {
+            inputs = getWeightedSum(layer, inputs, true);
+        }
+
+        return inputs;
+    }
+
+    private List<Double> getWeightedSum(int layer, List<Double> inputs, boolean sigmoid) {
+        List<Double> result = new ArrayList<>();
+        Vector<Vector<Double>> matrix = m_weights.get(layer);
+
+        for(int row = 0; row < matrix.size(); row++) {
+            double neuronActivation = 0;
+
+            for(int neuron = 0; neuron < matrix.get(row).size(); neuron++) {
+                neuronActivation += matrix.get(row).get(neuron) * inputs.get(row);
+            }
+
+            if(sigmoid) {
+                neuronActivation = sigmoid(neuronActivation);
+            }
+
+            result.add(neuronActivation);
+        }
+
+        return result;
+    }
+
+    private double sigmoid(double v) {
+        return 1 / (1 + Math.pow(Math.E, -v));
     }
 
     private void adjust(List<Double> result, List<Double> expected) {
