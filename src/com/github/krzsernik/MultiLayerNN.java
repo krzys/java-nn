@@ -18,31 +18,50 @@ public class MultiLayerNN {
     private double m_errorRate = 0.05;
 
     public MultiLayerNN(int inputs, List<Integer> hiddenLayers, int outputs) {
-        m_inputLayer = new Layer(inputs, null, null);
+        m_inputLayer = new Layer(inputs, null, m_learningRate);
 
         for(int neurons : hiddenLayers) {
             if(m_hiddenLayers.size() > 0) {
                 Layer prev = m_hiddenLayers.get(m_hiddenLayers.size() - 1);
-                m_hiddenLayers.add(new Layer(neurons, prev, null));
+                m_hiddenLayers.add(new Layer(neurons, prev, m_learningRate));
             } else {
-                m_hiddenLayers.add(new Layer(neurons, m_inputLayer, null));
+                m_hiddenLayers.add(new Layer(neurons, m_inputLayer, m_learningRate));
             }
         }
 
         Layer lastHiddenLayer = m_hiddenLayers.get(m_hiddenLayers.size() - 1);
-        m_outputLayer = new Layer(outputs, lastHiddenLayer, null);
+        m_outputLayer = new Layer(outputs, lastHiddenLayer, m_learningRate);
     }
     public void setLearningRate(double learningRate) {
         m_learningRate = learningRate;
+
+        Layer layer = m_inputLayer;
+        while(layer != null) {
+            for(Neuron n : layer.neurons) {
+                n.learningRate = learningRate;
+            }
+            layer = layer.next;
+        }
     }
     public void setErrorRate(double errorRate) {
         m_errorRate = errorRate;
     }
+    public boolean train(List<Double> inputs, List<Double> expected) {
+        List<List<Double>> activations = new ArrayList<>();
 
-//    public boolean train(List<Double> inputs, List<Double> expected) {}
-//    public boolean retrain() {}
+        m_inputLayer.activate(inputs);
 
-//    public List<Double> predict(List<Double> inputs) {}
+        Layer layer = m_hiddenLayers.size() > 0 ? m_hiddenLayers.get(0) : m_outputLayer;
+        while(layer != null) {
+            activations.add(layer.activate());
+
+            layer = layer.next;
+        }
+
+        System.out.println(activations);
+
+        return false;
+    }
 
     private double activate(double v) {
         return 1 / (1 + Math.pow(Math.E, -v));
