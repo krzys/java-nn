@@ -10,12 +10,12 @@ public class Layer {
     Layer next;
 
     Layer(int s, Layer p, double lr) {
-        size = s;
-        prev = p;
+        this.size = s;
+        this.prev = p;
 
-        if(prev != null) prev.next = this;
+        if(this.prev != null) this.prev.next = this;
 
-        for(int i = 0; i < size; i++) neurons.add(new Neuron(prev, lr));
+        for(int i = 0; i < this.size; i++) this.neurons.add(new Neuron(this.prev, lr));
     }
 
     void activate(List<Double> inputs) {
@@ -24,7 +24,6 @@ public class Layer {
             n.activation = inputs.get(index++);
         }
     }
-
     List<Double> activate() {
         List<Double> result = new ArrayList<>();
 
@@ -33,5 +32,16 @@ public class Layer {
         }
 
         return result;
+    }
+
+    void propagate(List<Double> target) {
+        for(int i = this.size - 1; i >= 0; i--) {
+            this.neurons.get(i).propagate(target.get(i));
+        }
+    }
+    void propagate() {
+        for(int i = this.size - 1; i >= 0; i--) {
+            this.neurons.get(i).propagate();
+        }
     }
 }

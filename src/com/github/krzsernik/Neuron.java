@@ -37,6 +37,14 @@ public class Neuron {
 
         return this.activation;
     }
+    void propagate(double target) {
+        double error = 0.5 * Math.pow(target - this.activation, 2);
+
+
+    }
+    void propagate() {
+
+    }
 
     private double sigmoid(double v) {
         return 1 / (1 + Math.pow(Math.E, -v));

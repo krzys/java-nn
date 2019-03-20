@@ -58,9 +58,19 @@ public class MultiLayerNN {
             layer = layer.next;
         }
 
-        System.out.println(activations);
+        double error = calcError(activations.get(activations.size() - 1), expected);
 
+        propagate(expected);
+
+        if(error < m_errorRate) return true;
         return false;
+    }
+    private void propagate(List<Double> expected) {
+        m_outputLayer.propagate(expected);
+
+        for(int hidden = m_hiddenLayers.size() - 1; hidden >= 0; hidden--) {
+            m_hiddenLayers.get(hidden).propagate();
+        }
     }
 
     private double activate(double v) {
@@ -68,5 +78,14 @@ public class MultiLayerNN {
     }
     private double derivative(double v) {
         return v * (1 - v);
+    }
+    private double calcError(List<Double> out, List<Double> expected) {
+        double result = 0;
+
+        for(int i = 0; i < out.size(); i++) {
+            result += 0.5 * Math.pow(expected.get(i) - out.get(i), 2);
+        }
+
+        return result;
     }
 }
