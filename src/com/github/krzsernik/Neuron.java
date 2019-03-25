@@ -7,13 +7,9 @@ public class Neuron {
     List<Connection> connections = new ArrayList<>();
     double activation = 0;
     double derivative = 0;
-    double bias;
-    double learningRate;
+    double delta = 0;
 
-    Neuron(Layer prev, double lr) {
-        this.learningRate = lr;
-        this.bias = Math.random() * 0.2 - 0.1;
-
+    Neuron(Layer prev) {
         if(prev == null) return;
 
         for(Neuron n : prev.neurons) {
@@ -30,33 +26,24 @@ public class Neuron {
                 weightedSum += c.weight * c.from.activation;
             }
         }
-        weightedSum += this.bias;
 
         this.activation = this.sigmoid(weightedSum);
         this.derivative = this.derivate(this.activation);
 
         return this.activation;
     }
-    void propagate(double target) {
-        double error = 0.5 * Math.pow(target - this.activation, 2);
-
-
-    }
-    void propagate() {
-
-    }
 
     private double sigmoid(double v) {
         return 1 / (1 + Math.pow(Math.E, -v));
     }
     private double derivate(double y) {
-        return y * (1 - y);
+        return y - Math.pow(y, 2); // y * (1 - y)
     }
 
     void AddConnection(Neuron to) {
-        connections.add(new Connection(this, to));
+        this.connections.add(new Connection(this, to));
     }
     void AddConnection(Neuron from, Neuron to) {
-        connections.add(new Connection(from, to));
+        this.connections.add(new Connection(from, to));
     }
 }
